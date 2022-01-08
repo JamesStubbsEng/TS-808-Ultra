@@ -93,14 +93,18 @@ void TS808UltraAudioProcessor::changeProgramName (int index, const juce::String&
 //==============================================================================
 void TS808UltraAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    // Use this method as the place to do any pre-playback
-    // initialisation that you need..
+    oversampling.initProcessing (samplesPerBlock);
+
+    for (int ch = 0; ch < 2; ++ch)
+        diodeClipper[ch].prepare (sampleRate);
 }
 
 void TS808UltraAudioProcessor::releaseResources()
 {
-    // When playback stops, you can use this as an opportunity to free up any
-    // spare memory, etc.
+    oversampling.reset();
+
+    for (int ch = 0; ch < 2; ++ch)
+        diodeClipper[ch].reset();
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -132,30 +136,27 @@ bool TS808UltraAudioProcessor::isBusesLayoutSupported (const BusesLayout& layout
 void TS808UltraAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
-    auto totalNumInputChannels  = getTotalNumInputChannels();
-    auto totalNumOutputChannels = getTotalNumOutputChannels();
+    
+    buffer.applyGain(Decibels::decibelsToGain (5.0f));
+    
+    dsp::AudioBlock<float> block (buffer);
+    auto osBlock = oversampling.processSamplesUp (block);
 
-    // In case we have more outputs than inputs, this code clears any output
-    // channels that didn't contain input data, (because these aren't
-    // guaranteed to be empty - they may contain garbage).
-    // This is here to avoid people getting screaming feedback
-    // when they first compile a plugin, but obviously you don't need to keep
-    // this code if your algorithm always overwrites all the output channels.
-    for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
-        buffer.clear (i, 0, buffer.getNumSamples());
+    float* ptrArray[] = {osBlock.getChannelPointer (0), osBlock.getChannelPointer (1)};
+    AudioBuffer<float> osBuffer (ptrArray, 2, static_cast<int> (osBlock.getNumSamples()));
 
-    // This is the place where you'd normally do the guts of your plugin's
-    // audio processing...
-    // Make sure to reset the state if your inner loop is processing
-    // the samples and the outer loop is handling the channels.
-    // Alternatively, you can process the samples with the channels
-    // interleaved by keeping the same state.
-    for (int channel = 0; channel < totalNumInputChannels; ++channel)
+    for (int ch = 0; ch < osBuffer.getNumChannels(); ++ch)
     {
-        auto* channelData = buffer.getWritePointer (channel);
+        diodeClipper[ch].setCircuitParams (1000.0f);
+        auto* x = osBuffer.getWritePointer (ch);
 
-        // ..do something to the data...
+        for (int n = 0; n < osBuffer.getNumSamples(); ++n)
+            x[n] = diodeClipper[ch].processSample (x[n]);
     }
+    
+    oversampling.processSamplesDown (block);
+    
+    buffer.applyGain(Decibels::decibelsToGain (-5.0f));
 }
 
 //==============================================================================

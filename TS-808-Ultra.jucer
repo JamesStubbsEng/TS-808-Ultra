@@ -4,6 +4,13 @@
               addUsingNamespaceToJuceHeader="1" jucerFormatVersion="1" companyName="JamesStubbsEng">
   <MAINGROUP id="W2mLIt" name="TS-808-Ultra">
     <GROUP id="{61299064-D730-37C5-5B10-9F9ACF9D474B}" name="Source">
+      <GROUP id="{A5B98B8D-688E-3CE3-D3BE-82C93002D338}" name="dsp">
+        <FILE id="UHlnsZ" name="ClippingStage.cpp" compile="1" resource="0"
+              file="Source/dsp/ClippingStage.cpp"/>
+        <FILE id="eXJktt" name="ClippingStage.h" compile="0" resource="0" file="Source/dsp/ClippingStage.h"/>
+        <FILE id="iM31GQ" name="ToneStage.cpp" compile="1" resource="0" file="Source/dsp/ToneStage.cpp"/>
+        <FILE id="aKuSdv" name="ToneStage.h" compile="0" resource="0" file="Source/dsp/ToneStage.h"/>
+      </GROUP>
       <FILE id="yL5C28" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
       <FILE id="RAUuGS" name="PluginProcessor.h" compile="0" resource="0"
@@ -37,7 +44,7 @@
         <MODULEPATH id="chowdsp_dsp" path="modules/chowdsp_utils/modules"/>
       </MODULEPATHS>
     </VS2019>
-    <XCODE_MAC targetFolder="Builds/MacOSX">
+    <XCODE_MAC targetFolder="Builds/MacOSX" xcodeValidArchs="x86_64">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" targetName="TS-808-Ultra"/>
         <CONFIGURATION isDebug="0" name="Release" targetName="TS-808-Ultra"/>

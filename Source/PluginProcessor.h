@@ -9,6 +9,7 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include "dsp/ClippingStage.h"
 
 //==============================================================================
 /**
@@ -55,5 +56,9 @@ public:
 
 private:
     //==============================================================================
+    DiodeClipper diodeClipper[2];
+
+    dsp::Oversampling<float> oversampling { 2, 1, dsp::Oversampling<float>::filterHalfBandPolyphaseIIR };
+    
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TS808UltraAudioProcessor)
 };

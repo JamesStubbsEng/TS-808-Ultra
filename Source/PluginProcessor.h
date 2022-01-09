@@ -56,6 +56,15 @@ public:
 
 private:
     //==============================================================================
+    AudioProcessorValueTreeState parameters;
+
+    std::atomic<float>* driveParameter = nullptr;
+    std::atomic<float>* toneParameter = nullptr;
+    std::atomic<float>* mixParameter = nullptr;
+    std::atomic<float>* filterParameter = nullptr;
+    std::atomic<float>* drySquashParameter = nullptr;
+    std::atomic<float>* gainParameter = nullptr;
+
     DiodeClipper diodeClipper[2];
 
     dsp::Oversampling<float> oversampling { 2, 1, dsp::Oversampling<float>::filterHalfBandPolyphaseIIR };

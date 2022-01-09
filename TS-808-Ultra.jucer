@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="DrALJH" name="TS-808-Ultra" projectType="audioplug" useAppConfig="0"
-              addUsingNamespaceToJuceHeader="1" jucerFormatVersion="1" companyName="JamesStubbsEng">
+              addUsingNamespaceToJuceHeader="1" jucerFormatVersion="1" companyName="JamesStubbsEng"
+              cppLanguageStandard="17">
   <MAINGROUP id="W2mLIt" name="TS-808-Ultra">
     <GROUP id="{61299064-D730-37C5-5B10-9F9ACF9D474B}" name="Source">
       <GROUP id="{A5B98B8D-688E-3CE3-D3BE-82C93002D338}" name="dsp">

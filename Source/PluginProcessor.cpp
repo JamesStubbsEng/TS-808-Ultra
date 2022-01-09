@@ -19,9 +19,23 @@ TS808UltraAudioProcessor::TS808UltraAudioProcessor()
                       #endif
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
-                       )
+                       ), parameters(*this, nullptr, Identifier("sampld"),
+                           {
+                               std::make_unique<AudioParameterFloat>("drive", "Drive", NormalisableRange<float>(0.0f, 10.0f,0.1f), 0.0f),
+                               std::make_unique<AudioParameterFloat>("tone", "Tone", NormalisableRange<float>(0.0f, 10.0f,0.1f), 0.0f),
+                               std::make_unique<AudioParameterFloat>("mix", "Mix", NormalisableRange<float>(0.0f, 10.0f,0.1f), 0.0f),
+                               std::make_unique<AudioParameterFloat>("filter", "Filter", NormalisableRange<float>(0.0f, 10.0f,0.1f), 0.0f),
+                               std::make_unique<AudioParameterFloat>("drySquash", "Dry Squash", NormalisableRange<float>(0.0f, 10.0f,0.1f), 0.0f),
+                               std::make_unique<AudioParameterFloat>("gain", "Gain", NormalisableRange<float>(0.0f, 10.0f,0.1f), 0.0f),
+                           })
 #endif
 {
+    driveParameter = parameters.getRawParameterValue("drive");
+    toneParameter = parameters.getRawParameterValue("tone");
+    mixParameter = parameters.getRawParameterValue("mix");
+    filterParameter = parameters.getRawParameterValue("filter");
+    drySquashParameter = parameters.getRawParameterValue("drySquash");
+    gainParameter = parameters.getRawParameterValue("gain");
 }
 
 TS808UltraAudioProcessor::~TS808UltraAudioProcessor()
@@ -167,21 +181,24 @@ bool TS808UltraAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* TS808UltraAudioProcessor::createEditor()
 {
-    return new TS808UltraAudioProcessorEditor (*this);
+    return new TS808UltraAudioProcessorEditor (*this, parameters);
 }
 
 //==============================================================================
 void TS808UltraAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
-    // You should use this method to store your parameters in the memory block.
-    // You could do that either as raw data, or use the XML or ValueTree classes
-    // as intermediaries to make it easy to save and load complex data.
+    auto state = parameters.copyState();
+    std::unique_ptr<XmlElement> xml(state.createXml());
+    copyXmlToBinary(*xml, destData);
 }
 
 void TS808UltraAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
-    // You should use this method to restore your parameters from this memory block,
-    // whose contents will have been created by the getStateInformation() call.
+    std::unique_ptr<XmlElement> xmlState(getXmlFromBinary(data, sizeInBytes));
+
+    if (xmlState.get() != nullptr)
+        if (xmlState->hasTagName(parameters.state.getType()))
+            parameters.replaceState(ValueTree::fromXml(*xmlState));
 }
 
 //==============================================================================

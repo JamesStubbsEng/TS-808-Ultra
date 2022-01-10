@@ -110,7 +110,11 @@ void TS808UltraAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
     oversampling.initProcessing (samplesPerBlock);
 
     for (int ch = 0; ch < 2; ++ch)
-        diodeClipper[ch].prepare (sampleRate);
+    {
+        diodeClipper[ch].prepare((float)sampleRate);
+        toneStage[ch].prepare((float)sampleRate);
+        toneStage[ch].setTone(*toneParameter);
+    }    
 }
 
 void TS808UltraAudioProcessor::releaseResources()
@@ -118,7 +122,11 @@ void TS808UltraAudioProcessor::releaseResources()
     oversampling.reset();
 
     for (int ch = 0; ch < 2; ++ch)
+    {
         diodeClipper[ch].reset();
+        toneStage[ch].reset();
+    }
+        
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -150,27 +158,40 @@ bool TS808UltraAudioProcessor::isBusesLayoutSupported (const BusesLayout& layout
 void TS808UltraAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
-    
-    buffer.applyGain(Decibels::decibelsToGain (5.0f));
-    
-    dsp::AudioBlock<float> block (buffer);
-    auto osBlock = oversampling.processSamplesUp (block);
 
-    float* ptrArray[] = {osBlock.getChannelPointer (0), osBlock.getChannelPointer (1)};
-    AudioBuffer<float> osBuffer (ptrArray, 2, static_cast<int> (osBlock.getNumSamples()));
+    const auto numSamples = buffer.getNumSamples();
+    
+    //buffer.applyGain(Decibels::decibelsToGain (5.0f));
+    //
+    //dsp::AudioBlock<float> block (buffer);
+    //auto osBlock = oversampling.processSamplesUp (block);
 
-    for (int ch = 0; ch < osBuffer.getNumChannels(); ++ch)
+    //float* ptrArray[] = {osBlock.getChannelPointer (0), osBlock.getChannelPointer (1)};
+    //AudioBuffer<float> osBuffer (ptrArray, 2, static_cast<int> (osBlock.getNumSamples()));
+
+    //for (int ch = 0; ch < osBuffer.getNumChannels(); ++ch)
+    //{
+    //    diodeClipper[ch].setCircuitParams (1000.0f);
+    //    auto* x = osBuffer.getWritePointer (ch);
+
+    //    for (int n = 0; n < osBuffer.getNumSamples(); ++n)
+    //        x[n] = diodeClipper[ch].processSample (x[n]);
+    //}
+    //
+    //oversampling.processSamplesDown (block);
+
+    //buffer.applyGain(Decibels::decibelsToGain(-5.0f));
+
+    // tone stage
+    for (int ch = 0; ch < buffer.getNumChannels(); ++ch)
     {
-        diodeClipper[ch].setCircuitParams (1000.0f);
-        auto* x = osBuffer.getWritePointer (ch);
+        auto* x = buffer.getWritePointer(ch);
 
-        for (int n = 0; n < osBuffer.getNumSamples(); ++n)
-            x[n] = diodeClipper[ch].processSample (x[n]);
+        toneStage[ch].setTone(*toneParameter);
+        toneStage[ch].processBlock(x, numSamples);
     }
     
-    oversampling.processSamplesDown (block);
-    
-    buffer.applyGain(Decibels::decibelsToGain (-5.0f));
+   
 }
 
 //==============================================================================

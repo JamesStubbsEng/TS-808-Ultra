@@ -10,6 +10,7 @@
 
 #include <JuceHeader.h>
 #include "dsp/ClippingStage.h"
+#include "dsp/ToneStage.h"
 
 //==============================================================================
 /**
@@ -66,6 +67,7 @@ private:
     std::atomic<float>* gainParameter = nullptr;
 
     DiodeClipper diodeClipper[2];
+    ToneStage toneStage[2];
 
     dsp::Oversampling<float> oversampling { 2, 1, dsp::Oversampling<float>::filterHalfBandPolyphaseIIR };
     

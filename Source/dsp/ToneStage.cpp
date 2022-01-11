@@ -24,7 +24,7 @@ void ToneStage::prepare(float sampleRate)
     chowdsp::IIRFilter<2>::reset();
     fs = (float)sampleRate;
 
-    rLSmoothed.setCurrentAndTargetValue(rLSmoothed.getTargetValue());
+    rLSmoothed.setCurrentAndTargetValue(10.0f);
     rLSmoothed.reset(sampleRate, 0.05);
 
     calcCoefs(rLSmoothed.getTargetValue());

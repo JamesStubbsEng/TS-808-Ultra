@@ -11,58 +11,31 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include "ClipWDFa.h"
+#include "ClipWDFb.h"
+#include "ClipWDFc.h"
 
-using namespace chowdsp::WDFT;
-
-class DiodeClipper
+class ClippingStage
 {
 public:
-    DiodeClipper() = default;
-
-    void prepare (double sampleRate)
-    {
-        C1.prepare ((float) sampleRate);
-    }
-
-    void reset()
-    {
-        C1.reset();
-    }
-
-    void setCircuitParams (float cutoff)
-    {
-        constexpr auto Cap = 47.0e-9f;
-        const auto Res = 1.0f / (MathConstants<float>::twoPi * cutoff * Cap);
-
-        C1.setCapacitanceValue (Cap);
-        R1.setResistanceValue (Res);
-    }
-
-    void setCircuitElements (float res, float cap)
-    {
-        C1.setCapacitanceValue (cap);
-        R1.setResistanceValue (res);
-    }
-
-    inline float processSample (float x)
-    {
-        Vs.setVoltage (x);
-
-        dp.incident (P1.reflected());
-        auto y = voltage<float> (C1);
-        P1.incident (dp.reflected());
-
-        return y;
-    }
+    ClippingStage();
+    void setDrive(float drive);
+    void reset();
+    void prepare(float sampleRate);
+    float processSample(float) noexcept;
 
 private:
-    ResistorT<float> R1 { 4700.0f };
-    ResistiveVoltageSourceT<float> Vs;
-    WDFSeriesT<float, decltype (Vs), decltype (R1)> S1 { Vs, R1 };
+    float fs = 44100.0f;
 
-    CapacitorT<float> C1 { 47.0e-9f };
-    WDFParallelT<float, decltype (S1), decltype (C1)> P1 { S1, C1 };
+    ClipWDFa clipWDFa;
+    ClipWDFb clipWDFb;
+    ClipWDFc clipWDFc;
 
-    // GZ34 diode pair
-    DiodePairT<float, decltype (P1)> dp { P1, 2.52e-9f };
+    const float rPot = 500000.0f;
+
+    juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear> p1Smoothed;
+
+    dsp::Oversampling<float> oversampling{ 2, 1, dsp::Oversampling<float>::filterHalfBandPolyphaseIIR };
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ClippingStage)
 };

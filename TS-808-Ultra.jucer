@@ -9,6 +9,9 @@
         <FILE id="UHlnsZ" name="ClippingStage.cpp" compile="1" resource="0"
               file="Source/dsp/ClippingStage.cpp"/>
         <FILE id="eXJktt" name="ClippingStage.h" compile="0" resource="0" file="Source/dsp/ClippingStage.h"/>
+        <FILE id="ZQMeIv" name="ClipWDFa.h" compile="0" resource="0" file="Source/dsp/ClipWDFa.h"/>
+        <FILE id="hTRBgg" name="ClipWDFb.h" compile="0" resource="0" file="Source/dsp/ClipWDFb.h"/>
+        <FILE id="Yz5W0g" name="ClipWDFc.h" compile="0" resource="0" file="Source/dsp/ClipWDFc.h"/>
         <FILE id="iM31GQ" name="ToneStage.cpp" compile="1" resource="0" file="Source/dsp/ToneStage.cpp"/>
         <FILE id="aKuSdv" name="ToneStage.h" compile="0" resource="0" file="Source/dsp/ToneStage.h"/>
       </GROUP>

@@ -66,10 +66,11 @@ private:
     std::atomic<float>* drySquashParameter = nullptr;
     std::atomic<float>* gainParameter = nullptr;
 
-    DiodeClipper diodeClipper[2];
+    ClippingStage clippingStage[2];
     ToneStage toneStage[2];
 
-    dsp::Oversampling<float> oversampling { 2, 1, dsp::Oversampling<float>::filterHalfBandPolyphaseIIR };
+    size_t oversampleFactor = 1;
+    dsp::Oversampling<float> oversampling { 2, oversampleFactor, dsp::Oversampling<float>::filterHalfBandPolyphaseIIR };
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TS808UltraAudioProcessor)
 };

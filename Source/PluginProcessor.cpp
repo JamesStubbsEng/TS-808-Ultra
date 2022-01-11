@@ -111,7 +111,8 @@ void TS808UltraAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
 
     for (int ch = 0; ch < 2; ++ch)
     {
-        diodeClipper[ch].prepare((float)sampleRate);
+        clippingStage[ch].prepare((float)sampleRate * std::powf(2.0f, float(oversampleFactor)));
+        clippingStage[ch].setDrive(*driveParameter);
         toneStage[ch].prepare((float)sampleRate);
         toneStage[ch].setTone(*toneParameter);
     }    
@@ -123,7 +124,7 @@ void TS808UltraAudioProcessor::releaseResources()
 
     for (int ch = 0; ch < 2; ++ch)
     {
-        diodeClipper[ch].reset();
+        clippingStage[ch].reset();
         toneStage[ch].reset();
     }
         
@@ -161,26 +162,22 @@ void TS808UltraAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
 
     const auto numSamples = buffer.getNumSamples();
     
-    //buffer.applyGain(Decibels::decibelsToGain (5.0f));
-    //
-    //dsp::AudioBlock<float> block (buffer);
-    //auto osBlock = oversampling.processSamplesUp (block);
+    dsp::AudioBlock<float> block (buffer);
+    auto osBlock = oversampling.processSamplesUp (block);
 
-    //float* ptrArray[] = {osBlock.getChannelPointer (0), osBlock.getChannelPointer (1)};
-    //AudioBuffer<float> osBuffer (ptrArray, 2, static_cast<int> (osBlock.getNumSamples()));
+    float* ptrArray[] = {osBlock.getChannelPointer (0), osBlock.getChannelPointer (1)};
+    AudioBuffer<float> osBuffer (ptrArray, 2, static_cast<int> (osBlock.getNumSamples()));
 
-    //for (int ch = 0; ch < osBuffer.getNumChannels(); ++ch)
-    //{
-    //    diodeClipper[ch].setCircuitParams (1000.0f);
-    //    auto* x = osBuffer.getWritePointer (ch);
+    for (int ch = 0; ch < osBuffer.getNumChannels(); ++ch)
+    {
+        clippingStage[ch].setDrive (*driveParameter);
+        auto* x = osBuffer.getWritePointer (ch);
 
-    //    for (int n = 0; n < osBuffer.getNumSamples(); ++n)
-    //        x[n] = diodeClipper[ch].processSample (x[n]);
-    //}
-    //
-    //oversampling.processSamplesDown (block);
-
-    //buffer.applyGain(Decibels::decibelsToGain(-5.0f));
+        for (int n = 0; n < osBuffer.getNumSamples(); ++n)
+            x[n] = clippingStage[ch].processSample (x[n]);
+    }
+    
+    oversampling.processSamplesDown (block);
 
     // tone stage
     for (int ch = 0; ch < buffer.getNumChannels(); ++ch)
@@ -191,7 +188,8 @@ void TS808UltraAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
         toneStage[ch].processBlock(x, numSamples);
     }
     
-   
+    // Gain stage
+    buffer.applyGain(Decibels::decibelsToGain ((float)*gainParameter * 2.0f));
 }
 
 //==============================================================================

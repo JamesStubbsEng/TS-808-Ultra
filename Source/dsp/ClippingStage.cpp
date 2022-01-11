@@ -16,7 +16,8 @@ ClippingStage::ClippingStage()
 
 void ClippingStage::setDrive(float drive)
 {
-    p1Smoothed.setTargetValue(jmap(drive, 0.0f, 10.0f, 10.0f, rPot));
+    auto audioTaperPotOutput = audioTaperPotSim(drive);
+    p1Smoothed.setTargetValue(jmap(audioTaperPotOutput, 0.0f, 10.0f, 10.0f, rPot));
 }
 
 void ClippingStage::reset()
@@ -45,4 +46,14 @@ float ClippingStage::processSample(float x) noexcept
     const float clipWDFaOut = clipWDFa.processSample(x);
     const float clipWDFbOut = clipWDFb.processSample(clipWDFaOut);
     return clipWDFc.processSample(clipWDFbOut);
+}
+
+float ClippingStage::audioTaperPotSim(float in)
+{
+    jassert(in >= 0.0f && in <= 10.0f);
+
+    if (in >= 0 && in <= 5.0f)
+        return in / 5.0f;
+    else 
+        return  (9.0f / 5.0f) * in - 8.0f;
 }

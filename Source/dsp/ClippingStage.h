@@ -25,6 +25,7 @@ public:
     float processSample(float) noexcept;
 
 private:
+    float audioTaperPotSim(float in);
     float fs = 44100.0f;
 
     ClipWDFa clipWDFa;

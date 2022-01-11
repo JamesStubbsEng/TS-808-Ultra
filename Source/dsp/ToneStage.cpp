@@ -16,7 +16,8 @@ ToneStage::ToneStage()
 
 void ToneStage::setTone(float tone)
 {
-    rLSmoothed.setTargetValue(jmap(tone, 0.0f, 10.0f, 10.0f, rPot));
+    auto gTaperPotOutput = taperPotSim(tone);
+    rLSmoothed.setTargetValue(jmap(gTaperPotOutput, 0.0f, 10.0f, 10.0f, rPot));
 }
 
 void ToneStage::prepare(float sampleRate)
@@ -89,4 +90,31 @@ void ToneStage::processBlock(float* block, const int numSamples) noexcept
     {
         chowdsp::IIRFilter<2>::processBlock(block, numSamples);
     }
+}
+
+float ToneStage::taperPotSim(float in)
+{
+    jassert(in >= 0.0f && in <= 10.0f);
+
+    // g taper
+    //if (in >= 0 && in <= 1.0f)
+    //    return 3.0f * in;
+    //else if (in > 1.0f && in <= 9.0f)
+    //    return 0.5f * in + 2.5f;
+    //else
+    //    return 3.0f * in - 20.0f;
+
+    // inverse z
+    //if (in >= 0 && in <= 4.0f)
+    //    return 0.5f * in;
+    //else if (in > 4.0f && in <= 6.0f)
+    //    return 3.0f * in - 10.0f;
+    //else
+    //    return 0.5f * in + 5.0f;
+
+    // inverse log taper
+    if (in >= 0 && in <= 5.0f)
+        return (9.0f / 5.0f) * in;
+    else
+        return  (1.0f / 5.0f) * in + 8.0f;
 }

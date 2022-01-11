@@ -21,6 +21,7 @@ public:
     void processBlock(float* block, const int numSamples) noexcept override;
 
 private:
+    float taperPotSim(float in);
     float fs = 44100.0f;
 
     const float rPot = 20000.0f;

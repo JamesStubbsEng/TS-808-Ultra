@@ -24,7 +24,7 @@ TS808UltraAudioProcessor::TS808UltraAudioProcessor()
                                std::make_unique<AudioParameterFloat>("drive", "Drive", NormalisableRange<float>(0.0f, 10.0f,0.1f), 0.0f),
                                std::make_unique<AudioParameterFloat>("tone", "Tone", NormalisableRange<float>(0.0f, 10.0f,0.1f), 0.0f),
                                std::make_unique<AudioParameterFloat>("mix", "Mix", NormalisableRange<float>(0.0f, 10.0f,0.1f), 0.0f),
-                               std::make_unique<AudioParameterFloat>("filter", "Filter", NormalisableRange<float>(0.0f, 10.0f,0.1f), 0.0f),
+                               std::make_unique<AudioParameterFloat>("filter", "Filter", NormalisableRange<float>(20.0f, 20000.0f,1.0f, 0.4f), 20000.0f),
                                std::make_unique<AudioParameterFloat>("drySquash", "Dry Squash", NormalisableRange<float>(0.0f, 10.0f,0.1f), 0.0f),
                                std::make_unique<AudioParameterFloat>("gain", "Gain", NormalisableRange<float>(0.0f, 10.0f,0.1f), 0.0f),
                            })
@@ -107,6 +107,16 @@ void TS808UltraAudioProcessor::changeProgramName (int index, const juce::String&
 //==============================================================================
 void TS808UltraAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
+    dsp::ProcessSpec spec;
+    spec.sampleRate = sampleRate;
+    spec.maximumBlockSize = samplesPerBlock;
+    spec.numChannels = getTotalNumOutputChannels();
+
+    dryWetMixer.prepare(spec);
+    dryWetMixer.setMixingRule(juce::dsp::DryWetMixingRule::squareRoot3dB);
+
+    dryLPF.prepare(spec);
+
     oversampling.initProcessing (samplesPerBlock);
 
     for (int ch = 0; ch < 2; ++ch)
@@ -120,6 +130,8 @@ void TS808UltraAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
 
 void TS808UltraAudioProcessor::releaseResources()
 {
+    dryWetMixer.reset();
+    dryLPF.reset();
     oversampling.reset();
 
     for (int ch = 0; ch < 2; ++ch)
@@ -161,7 +173,25 @@ void TS808UltraAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
     juce::ScopedNoDenormals noDenormals;
 
     const auto numSamples = buffer.getNumSamples();
+
+    // copy original dry signal into a buffer
+    AudioBuffer<float> parallelBuffer;
+    parallelBuffer.makeCopyOf(buffer);
+    dsp::AudioBlock<float> parallelBlock(parallelBuffer);
+    auto parallelContext = juce::dsp::ProcessContextReplacing<float>(parallelBlock);
+
+    //------start of di parallel processing---------
+    dryLPF.setCutoff(*filterParameter);
+    dryLPF.processBlock(parallelContext);
+
+    dryWetMixer.setWetMixProportion(jmap((float)*mixParameter, 0.0f, 10.0f, 0.0f, 1.0f));
+    dryWetMixer.pushDrySamples(parallelBlock);
+    //------end of di parallel processing-----------
+
     
+    //--------start of TS808 processing------------
+
+    // do ts808 processing on parallelBuffer
     dsp::AudioBlock<float> block (buffer);
     auto osBlock = oversampling.processSamplesUp (block);
 
@@ -187,6 +217,11 @@ void TS808UltraAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
         toneStage[ch].setTone(*toneParameter);
         toneStage[ch].processBlock(x, numSamples);
     }
+
+    //--------end of TS808 processing-----------
+
+    // mix signals
+    dryWetMixer.mixWetSamples(block);
     
     // Gain stage
     buffer.applyGain(Decibels::decibelsToGain ((float)*gainParameter * 2.0f));

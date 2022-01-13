@@ -11,6 +11,7 @@
 #include <JuceHeader.h>
 #include "dsp/ClippingStage.h"
 #include "dsp/ToneStage.h"
+#include "dsp/DryLPF.h"
 
 //==============================================================================
 /**
@@ -66,8 +67,11 @@ private:
     std::atomic<float>* drySquashParameter = nullptr;
     std::atomic<float>* gainParameter = nullptr;
 
+    dsp::DryWetMixer<float> dryWetMixer;
+
     ClippingStage clippingStage[2];
     ToneStage toneStage[2];
+    DryLPF dryLPF;
 
     size_t oversampleFactor = 1;
     dsp::Oversampling<float> oversampling { 2, oversampleFactor, dsp::Oversampling<float>::filterHalfBandPolyphaseIIR };

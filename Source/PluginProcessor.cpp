@@ -24,8 +24,8 @@ TS808UltraAudioProcessor::TS808UltraAudioProcessor()
                                std::make_unique<AudioParameterFloat>("drive", "Drive", NormalisableRange<float>(0.0f, 10.0f,0.1f), 0.0f),
                                std::make_unique<AudioParameterFloat>("tone", "Tone", NormalisableRange<float>(0.0f, 10.0f,0.1f), 0.0f),
                                std::make_unique<AudioParameterFloat>("mix", "Mix", NormalisableRange<float>(0.0f, 10.0f,0.1f), 0.0f),
-                               std::make_unique<AudioParameterFloat>("filter", "Filter", NormalisableRange<float>(20.0f, 20000.0f,1.0f, 0.4f), 20000.0f),
-                               std::make_unique<AudioParameterFloat>("drySquash", "Dry Squash", NormalisableRange<float>(0.0f, 10.0f,0.1f), 0.0f),
+                               std::make_unique<AudioParameterFloat>("filter", "Direct Filter", NormalisableRange<float>(0.0f, 10.0f,0.1f), 0.0f),
+                               std::make_unique<AudioParameterFloat>("drySquash", "Direct Squash", NormalisableRange<float>(0.0f, 10.0f,0.1f), 0.0f),
                                std::make_unique<AudioParameterFloat>("gain", "Gain", NormalisableRange<float>(0.0f, 10.0f,0.1f), 0.0f),
                            })
 #endif
@@ -113,8 +113,9 @@ void TS808UltraAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
     spec.numChannels = getTotalNumOutputChannels();
 
     dryWetMixer.prepare(spec);
-    dryWetMixer.setMixingRule(juce::dsp::DryWetMixingRule::squareRoot3dB);
+    dryWetMixer.setMixingRule(juce::dsp::DryWetMixingRule::sin3dB);
 
+    dryComp.prepare(sampleRate);
     dryLPF.prepare(spec);
 
     oversampling.initProcessing (samplesPerBlock);
@@ -181,6 +182,9 @@ void TS808UltraAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
     auto parallelContext = juce::dsp::ProcessContextReplacing<float>(parallelBlock);
 
     //------start of di parallel processing---------
+    dryComp.setThreshold(*drySquashParameter);
+    dryComp.processBlock(parallelBuffer);
+
     dryLPF.setCutoff(*filterParameter);
     dryLPF.processBlock(parallelContext);
 

@@ -44,7 +44,7 @@ TS808UltraAudioProcessorEditor::TS808UltraAudioProcessorEditor (TS808UltraAudioP
     filterSlider.setScrollWheelEnabled(false);
     filterSlider.setTextBoxStyle(Slider::TextBoxBelow, false, 50, 30);
     filterSlider.setSliderStyle(Slider::SliderStyle::RotaryVerticalDrag);
-    filterLabel.setText("Filter", NotificationType::dontSendNotification);
+    filterLabel.setText("Direct Filter", NotificationType::dontSendNotification);
     filterLabel.attachToComponent(&filterSlider, false);
     addAndMakeVisible(filterSlider);
     filterSliderAttachment.reset(new SliderAttachment(valueTreeState, "filter", filterSlider));
@@ -53,7 +53,7 @@ TS808UltraAudioProcessorEditor::TS808UltraAudioProcessorEditor (TS808UltraAudioP
     drySquashSlider.setScrollWheelEnabled(false);
     drySquashSlider.setTextBoxStyle(Slider::TextBoxBelow, false, 50, 30);
     drySquashSlider.setSliderStyle(Slider::SliderStyle::RotaryVerticalDrag);
-    drySquashLabel.setText("Dry Squash", NotificationType::dontSendNotification);
+    drySquashLabel.setText("Direct Squash", NotificationType::dontSendNotification);
     drySquashLabel.attachToComponent(&drySquashSlider, false);
     addAndMakeVisible(drySquashSlider);
     drySquashSliderAttachment.reset(new SliderAttachment(valueTreeState, "drySquash", drySquashSlider));

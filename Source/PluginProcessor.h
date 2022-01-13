@@ -12,6 +12,7 @@
 #include "dsp/ClippingStage.h"
 #include "dsp/ToneStage.h"
 #include "dsp/DryLPF.h"
+#include "dsp/DryComp.h"
 
 //==============================================================================
 /**
@@ -72,6 +73,7 @@ private:
     ClippingStage clippingStage[2];
     ToneStage toneStage[2];
     DryLPF dryLPF;
+    DryComp dryComp;
 
     size_t oversampleFactor = 1;
     dsp::Oversampling<float> oversampling { 2, oversampleFactor, dsp::Oversampling<float>::filterHalfBandPolyphaseIIR };

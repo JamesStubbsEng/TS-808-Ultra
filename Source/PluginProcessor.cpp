@@ -21,21 +21,24 @@ TS808UltraAudioProcessor::TS808UltraAudioProcessor()
                      #endif
                        ), parameters(*this, nullptr, Identifier("sampld"),
                            {
-                               std::make_unique<AudioParameterFloat>("drive", "Drive", NormalisableRange<float>(0.0f, 10.0f,0.1f), 0.0f),
-                               std::make_unique<AudioParameterFloat>("tone", "Tone", NormalisableRange<float>(0.0f, 10.0f,0.1f), 0.0f),
-                               std::make_unique<AudioParameterFloat>("mix", "Mix", NormalisableRange<float>(0.0f, 10.0f,0.1f), 0.0f),
+                               std::make_unique<AudioParameterFloat>("inputGain", "Input Gain", NormalisableRange<float>(-80.0f, 20.0f,0.1f, 2.0f), 0.0f),
+                               std::make_unique<AudioParameterFloat>("drive", "Drive", NormalisableRange<float>(0.0f, 10.0f,0.1f), 2.0f),
+                               std::make_unique<AudioParameterFloat>("tone", "Tone", NormalisableRange<float>(0.0f, 10.0f,0.1f), 5.0f),
+                               std::make_unique<AudioParameterFloat>("mix", "Mix", NormalisableRange<float>(0.0f, 10.0f,0.1f), 10.0f),
                                std::make_unique<AudioParameterFloat>("filter", "Direct Filter", NormalisableRange<float>(0.0f, 10.0f,0.1f), 0.0f),
                                std::make_unique<AudioParameterFloat>("drySquash", "Direct Squash", NormalisableRange<float>(0.0f, 10.0f,0.1f), 0.0f),
-                               std::make_unique<AudioParameterFloat>("gain", "Gain", NormalisableRange<float>(0.0f, 10.0f,0.1f), 0.0f),
+                               std::make_unique<AudioParameterFloat>("outputGain", "Output Gain", NormalisableRange<float>(-30.0f, 30.0f,0.1f), 0.0f),
+                              
                            })
 #endif
 {
+    inputGainParameter = parameters.getRawParameterValue("inputGain");
     driveParameter = parameters.getRawParameterValue("drive");
     toneParameter = parameters.getRawParameterValue("tone");
     mixParameter = parameters.getRawParameterValue("mix");
     filterParameter = parameters.getRawParameterValue("filter");
     drySquashParameter = parameters.getRawParameterValue("drySquash");
-    gainParameter = parameters.getRawParameterValue("gain");
+    outputGainParameter = parameters.getRawParameterValue("outputGain");
 }
 
 TS808UltraAudioProcessor::~TS808UltraAudioProcessor()
@@ -118,6 +121,9 @@ void TS808UltraAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
     dryComp.prepare(sampleRate);
     dryLPF.prepare(spec);
 
+    inputGain.prepare(spec);
+    outputGain.prepare(spec);
+
     oversampling.initProcessing (samplesPerBlock);
 
     for (int ch = 0; ch < 2; ++ch)
@@ -133,6 +139,8 @@ void TS808UltraAudioProcessor::releaseResources()
 {
     dryWetMixer.reset();
     dryLPF.reset();
+    inputGain.reset();
+    outputGain.reset();
     oversampling.reset();
 
     for (int ch = 0; ch < 2; ++ch)
@@ -172,8 +180,14 @@ bool TS808UltraAudioProcessor::isBusesLayoutSupported (const BusesLayout& layout
 void TS808UltraAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
-
     const auto numSamples = buffer.getNumSamples();
+
+    dsp::AudioBlock<float> block(buffer);
+    auto context = juce::dsp::ProcessContextReplacing<float>(block);  
+
+    // input gain stage
+    inputGain.setGainDecibels(*inputGainParameter);
+    inputGain.process(context);
 
     // copy original dry signal into a buffer
     AudioBuffer<float> parallelBuffer;
@@ -195,8 +209,7 @@ void TS808UltraAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
     
     //--------start of TS808 processing------------
 
-    // do ts808 processing on parallelBuffer
-    dsp::AudioBlock<float> block (buffer);
+    
     auto osBlock = oversampling.processSamplesUp (block);
 
     float* ptrArray[] = {osBlock.getChannelPointer (0), osBlock.getChannelPointer (1)};
@@ -227,8 +240,9 @@ void TS808UltraAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
     // mix signals
     dryWetMixer.mixWetSamples(block);
     
-    // Gain stage
-    buffer.applyGain(Decibels::decibelsToGain ((float)*gainParameter * 2.0f));
+    // Output Gain stage
+    outputGain.setGainDecibels(*outputGainParameter);
+    outputGain.process(context);
 }
 
 //==============================================================================

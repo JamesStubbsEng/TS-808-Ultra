@@ -33,26 +33,29 @@ private:
 
     typedef AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
 
+    Slider inputGainSlider;
     Slider driveSlider;
     Slider toneSlider;
     Slider mixSlider;
     Slider filterSlider;
     Slider drySquashSlider;
-    Slider gainSlider;
+    Slider outputGainSlider;
 
+    Label inputGainLabel;
     Label driveLabel;
     Label toneLabel;
     Label mixLabel;
     Label filterLabel;
     Label drySquashLabel;
-    Label gainLabel;
+    Label outputGainLabel;
 
+    std::unique_ptr<SliderAttachment> inputGainSliderAttachment;
     std::unique_ptr<SliderAttachment> driveSliderAttachment;
     std::unique_ptr<SliderAttachment> toneSliderAttachment;
     std::unique_ptr<SliderAttachment> mixSliderAttachment;
     std::unique_ptr<SliderAttachment> filterSliderAttachment;
     std::unique_ptr<SliderAttachment> drySquashSliderAttachment;
-    std::unique_ptr<SliderAttachment> gainSliderAttachment;
+    std::unique_ptr<SliderAttachment> outputGainSliderAttachment;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TS808UltraAudioProcessorEditor)
 };

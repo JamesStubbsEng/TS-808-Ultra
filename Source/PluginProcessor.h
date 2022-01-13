@@ -61,12 +61,13 @@ private:
     //==============================================================================
     AudioProcessorValueTreeState parameters;
 
+    std::atomic<float>* inputGainParameter = nullptr;
     std::atomic<float>* driveParameter = nullptr;
     std::atomic<float>* toneParameter = nullptr;
     std::atomic<float>* mixParameter = nullptr;
     std::atomic<float>* filterParameter = nullptr;
     std::atomic<float>* drySquashParameter = nullptr;
-    std::atomic<float>* gainParameter = nullptr;
+    std::atomic<float>* outputGainParameter = nullptr;
 
     dsp::DryWetMixer<float> dryWetMixer;
 
@@ -77,6 +78,9 @@ private:
 
     size_t oversampleFactor = 1;
     dsp::Oversampling<float> oversampling { 2, oversampleFactor, dsp::Oversampling<float>::filterHalfBandPolyphaseIIR };
+
+    dsp::Gain<float> inputGain;
+    dsp::Gain<float> outputGain;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TS808UltraAudioProcessor)
 };

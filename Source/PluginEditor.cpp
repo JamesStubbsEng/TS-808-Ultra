@@ -58,16 +58,25 @@ TS808UltraAudioProcessorEditor::TS808UltraAudioProcessorEditor (TS808UltraAudioP
     addAndMakeVisible(drySquashSlider);
     drySquashSliderAttachment.reset(new SliderAttachment(valueTreeState, "drySquash", drySquashSlider));
 
-    gainSlider.setSliderStyle(juce::Slider::Rotary);
-    gainSlider.setScrollWheelEnabled(false);
-    gainSlider.setTextBoxStyle(Slider::TextBoxBelow, false, 50, 30);
-    gainSlider.setSliderStyle(Slider::SliderStyle::RotaryVerticalDrag);
-    gainLabel.setText("Gain", NotificationType::dontSendNotification);
-    gainLabel.attachToComponent(&gainSlider, false);
-    addAndMakeVisible(gainSlider);
-    gainSliderAttachment.reset(new SliderAttachment(valueTreeState, "gain", gainSlider));
+    outputGainSlider.setSliderStyle(juce::Slider::Rotary);
+    outputGainSlider.setScrollWheelEnabled(false);
+    outputGainSlider.setTextBoxStyle(Slider::TextBoxBelow, false, 50, 30);
+    outputGainSlider.setSliderStyle(Slider::SliderStyle::RotaryVerticalDrag);
+    outputGainLabel.setText("Output Gain", NotificationType::dontSendNotification);
+    outputGainLabel.attachToComponent(&outputGainSlider, false);
+    addAndMakeVisible(outputGainSlider);
+    outputGainSliderAttachment.reset(new SliderAttachment(valueTreeState, "outputGain", outputGainSlider));
 
-    setSize (500, 400);
+    inputGainSlider.setSliderStyle(juce::Slider::Rotary);
+    inputGainSlider.setScrollWheelEnabled(false);
+    inputGainSlider.setTextBoxStyle(Slider::TextBoxBelow, false, 50, 30);
+    inputGainSlider.setSliderStyle(Slider::SliderStyle::RotaryVerticalDrag);
+    inputGainLabel.setText("Input Gain", NotificationType::dontSendNotification);
+    inputGainLabel.attachToComponent(&inputGainSlider, false);
+    addAndMakeVisible(inputGainSlider);
+    inputGainSliderAttachment.reset(new SliderAttachment(valueTreeState, "inputGain", inputGainSlider));
+
+    setSize (600, 450);
 }
 
 TS808UltraAudioProcessorEditor::~TS808UltraAudioProcessorEditor()
@@ -83,16 +92,18 @@ void TS808UltraAudioProcessorEditor::paint (juce::Graphics& g)
 void TS808UltraAudioProcessorEditor::resized()
 {
     auto area = getBounds().reduced(20);
-    auto sliderWidth = area.getWidth() / 3;
+    auto sliderWidth = area.getWidth() / 4;
     auto sliderHeight = area.getHeight() / 2;
 
     auto topRow = area.removeFromTop(sliderHeight);
 
+    inputGainSlider.setBounds(topRow.removeFromLeft(sliderWidth).reduced(30));
     driveSlider.setBounds(topRow.removeFromLeft(sliderWidth).reduced(30));
     toneSlider.setBounds(topRow.removeFromLeft(sliderWidth).reduced(30));
     mixSlider.setBounds(topRow.removeFromLeft(sliderWidth).reduced(30));
 
+    area.removeFromLeft(sliderWidth / 2);
     filterSlider.setBounds(area.removeFromLeft(sliderWidth).reduced(30));
     drySquashSlider.setBounds(area.removeFromLeft(sliderWidth).reduced(30));
-    gainSlider.setBounds(area.removeFromLeft(sliderWidth).reduced(30));
+    outputGainSlider.setBounds(area.removeFromLeft(sliderWidth).reduced(30));
 }

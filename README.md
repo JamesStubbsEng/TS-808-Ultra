@@ -27,8 +27,7 @@ The analog transfer function can then be converted into a digital transfer funct
 
 A comparison between the analog and digtial transfer function for the tone circuit is seen below:
 
-![TS808_tone_analog_vs_digit_simulations](https://user-images.githubusercontent.com/64380573/149830800-cd17377c-e200-4693-bb0e-90df856d7d6b.PNG)
-
+![TS808_tone_analog_vs_digit_simulations2](https://user-images.githubusercontent.com/64380573/149831689-ae1cc735-6ed8-411a-a8c6-a9d3b5531bb5.PNG)
 
 ## Other features
 To make the iconic tube screamer circuit more usable in applications other than in front of a guitar amp the following is added to the plugin: input gain, mix, direct LFP, direct compression, and output gain! These extra features are implemented in the digital domain.

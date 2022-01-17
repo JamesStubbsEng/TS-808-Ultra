@@ -23,6 +23,13 @@ https://www.researchgate.net/publication/299514713_An_Improved_and_Generalized_D
 The tone circuit analog transfer function can be found by nodal analysis, and is shown in section 4.3 on page 6 of the paper below:
 http://dafx.de/paper-archive/2007/Papers/p189.pdf
 
+The analog transfer function can then be converted into a digital transfer function using the bilinear transform (BLT). No frequency warping was used in the plugin, as it was found no frequency warping produces a better sound.
+
+A comparison between the analog and digtial transfer function for the tone circuit is seen below:
+
+![TS808_tone_analog_vs_digit_simulations](https://user-images.githubusercontent.com/64380573/149830800-cd17377c-e200-4693-bb0e-90df856d7d6b.PNG)
+
+
 ## Other features
 To make the iconic tube screamer circuit more usable in applications other than in front of a guitar amp the following is added to the plugin: input gain, mix, direct LFP, direct compression, and output gain! These extra features are implemented in the digital domain.
 

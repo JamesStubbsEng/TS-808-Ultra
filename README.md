@@ -2,6 +2,9 @@
 
 Model of the classic Ibanez Tube Screamer 808 using Nodal Analysis and WDF with a few new features added!
 
+Download Windows vst3 and Mac vst3 and AU files here:
+https://github.com/JamesStubbsEng/TS-808-Ultra/releases/tag/v1.0.0
+
 ![TS-808-Ultra(Screenshot)](https://user-images.githubusercontent.com/64380573/149594162-f6165671-9757-4dc0-9076-938c92f93ed2.PNG)
 
 ## Basis of circuits simulated 

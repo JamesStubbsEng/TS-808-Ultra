@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="DrALJH" name="TS-808-Ultra" projectType="audioplug" useAppConfig="0"
               addUsingNamespaceToJuceHeader="1" jucerFormatVersion="1" companyName="JamesStubbsEng"
-              cppLanguageStandard="17">
+              cppLanguageStandard="17" displaySplashScreen="1">
   <MAINGROUP id="W2mLIt" name="TS-808-Ultra">
     <GROUP id="{48C82606-B5CD-EABF-3AB3-AAD2A587A3AA}" name="External">
       <GROUP id="{6F0C429A-E614-C409-E219-9F3FD672B817}" name="SimpleComp">

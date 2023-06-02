@@ -125,6 +125,7 @@ void TS808UltraAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
     outputGain.prepare(spec);
 
     oversampling.initProcessing (samplesPerBlock);
+    parallelBuffer.setSize(spec.numChannels, spec.maximumBlockSize);
 
     for (int ch = 0; ch < 2; ++ch)
     {
@@ -190,8 +191,7 @@ void TS808UltraAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
     inputGain.process(context);
 
     // copy original dry signal into a buffer
-    AudioBuffer<float> parallelBuffer;
-    parallelBuffer.makeCopyOf(buffer);
+    parallelBuffer.makeCopyOf(buffer, true);
     dsp::AudioBlock<float> parallelBlock(parallelBuffer);
     auto parallelContext = juce::dsp::ProcessContextReplacing<float>(parallelBlock);
 
@@ -208,19 +208,15 @@ void TS808UltraAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
 
     
     //--------start of TS808 processing------------
-
-    
+   
     auto osBlock = oversampling.processSamplesUp (block);
 
-    float* ptrArray[] = {osBlock.getChannelPointer (0), osBlock.getChannelPointer (1)};
-    AudioBuffer<float> osBuffer (ptrArray, 2, static_cast<int> (osBlock.getNumSamples()));
-
-    for (int ch = 0; ch < osBuffer.getNumChannels(); ++ch)
+    for (int ch = 0; ch < osBlock.getNumChannels(); ++ch)
     {
         clippingStage[ch].setDrive (*driveParameter);
-        auto* x = osBuffer.getWritePointer (ch);
+        auto* x = osBlock.getChannelPointer(ch);
 
-        for (int n = 0; n < osBuffer.getNumSamples(); ++n)
+        for (int n = 0; n < osBlock.getNumSamples(); ++n)
             x[n] = clippingStage[ch].processSample (x[n]);
     }
     

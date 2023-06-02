@@ -81,6 +81,8 @@ private:
 
     dsp::Gain<float> inputGain;
     dsp::Gain<float> outputGain;
+
+    AudioBuffer<float> parallelBuffer;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TS808UltraAudioProcessor)
 };
